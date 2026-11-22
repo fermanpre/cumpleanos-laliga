@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cumpleaños en LaLiga</title>
+<meta name="description" content="La paradoja del cumpleaños aplicada a las plantillas de Primera División: qué jugadores de cada equipo comparten cumpleaños.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="barra">
+  <a class="marca" href="#/" id="marca">🎂 <span data-i18n="titulo">Cumpleaños en LaLiga</span></a>
+  <div class="controles">
+    <label class="oculto-visual" for="selTemporada" data-i18n="temporada">Temporada</label>
+    <select id="selTemporada"></select>
+    <button id="btnIdioma" type="button" aria-label="Idioma / Language">EN</button>
+  </div>
+</header>
+<main id="contenido" aria-live="polite"></main>
+<footer class="pie" id="pie"></footer>
+<script src="app.js"></script>
+</body>
+</html>
