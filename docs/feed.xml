@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Cumpleaños en LaLiga · Historial de cambios</title>
+    <link>https://fermanpre.github.io/cumpleanos-laliga/changelog.html</link>
+    <description>Cambios del sitio Cumpleaños en LaLiga.</description>
+    <language>es</language>
+    <item>
+      <title>Vista «Todas», modo oscuro y páginas del sitio</title>
+      <link>https://fermanpre.github.io/cumpleanos-laliga/changelog.html#cambio-0</link>
+      <guid isPermaLink="true">https://fermanpre.github.io/cumpleanos-laliga/changelog.html#cambio-0</guid>
+      <pubDate>Mon, 23 Nov 2026 12:00:00 +0000</pubDate>
+      <description>Nueva opción «Todas» en el selector de temporada, con el agregado de las cinco temporadas: 59 de 100 plantillas con coincidencia, frente a 51,6 esperadas. Etiqueta «Selecciona una temporada» junto al selector, botón de tema claro, oscuro o automático, logos de GitHub, LinkedIn y GitHub Sponsors en la cabecera, y una cinta inferior con las páginas Acerca de, Enlaces, Sobre el autor, Privacidad, Historial de cambios, RSS y Licencia.</description>
+    </item>
+    <item>
+      <title>Cinco temporadas y tooltips en el calendario</title>
+      <link>https://fermanpre.github.io/cumpleanos-laliga/changelog.html#cambio-1</link>
+      <guid isPermaLink="true">https://fermanpre.github.io/cumpleanos-laliga/changelog.html#cambio-1</guid>
+      <pubDate>Mon, 23 Nov 2026 12:00:00 +0000</pubDate>
+      <description>Se añaden las temporadas 2022/23, 2023/24 y 2024/25, con la plantilla al cierre del mercado de verano: se usa la versión de cada artículo de Wikipedia de mediados de septiembre y los dorsales que faltan se completan con bdfutbol. Las fechas de nacimiento se contrastan con Wikidata, que prevalece si es completa, no es el 1 de enero y el año coincide. Al pasar el ratón por el calendario de cumpleaños de un equipo, el tooltip dice qué jugadores cumplen años ese día.</description>
+    </item>
+    <item>
+      <title>Primera publicación</title>
+      <link>https://fermanpre.github.io/cumpleanos-laliga/changelog.html#cambio-2</link>
+      <guid isPermaLink="true">https://fermanpre.github.io/cumpleanos-laliga/changelog.html#cambio-2</guid>
+      <pubDate>Sun, 22 Nov 2026 12:00:00 +0000</pubDate>
+      <description>Primera versión del sitio con dos temporadas, 2025/26 y 2026/27: resumen de cuántos equipos de Primera tienen dos jugadores con el mismo cumpleaños, plantilla de cada equipo con las parejas resaltadas y calendario anual. En español e inglés.</description>
+    </item>
+  </channel>
+</rss>

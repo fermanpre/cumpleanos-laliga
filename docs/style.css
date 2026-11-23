@@ -94,3 +94,37 @@ tr.par td:last-child { font-weight: 700; color: var(--acento); }
   .fila-barra { grid-template-columns: 90px 1fr 54px; }
   .cifra .grande { font-size: 3.2rem; }
 }
+
+/* Idioma: solo se ve el texto del idioma activo (html[lang]). */
+html:not([lang="en"]) .i18n-en { display: none; }
+html[lang="en"] .i18n-es { display: none; }
+
+/* Cabecera: logos del autor junto a los botones. */
+.controles { align-items: center; }
+.icono-autor { display: inline-flex; align-items: center; justify-content: center; color: var(--suave); padding: 4px; border-radius: 6px; }
+.icono-autor:hover { color: var(--azul); background: var(--vacio); }
+
+/* Barra de secciones de las páginas informativas. */
+.subnav .interior { overflow-x: auto; white-space: nowrap; }
+.subnav a { padding: 7px 12px; border-radius: 6px; color: var(--suave); text-decoration: none; font-size: 0.92rem; border-bottom: 2px solid transparent; }
+.subnav a:hover { color: var(--texto); background: var(--vacio); }
+.subnav a[aria-current] { color: var(--azul); font-weight: 600; border-bottom-color: var(--azul); border-radius: 6px 6px 0 0; }
+
+/* Páginas informativas. */
+.contenedor-pagina { max-width: 860px; margin: 0 auto; padding: 20px 16px 40px; }
+.cabecera-pagina h1 { margin-bottom: 4px; }
+.cabecera-pagina .subtitulo { color: var(--suave); margin: 0 0 18px; }
+.prosa p, .prosa li { max-width: 70ch; }
+.prosa ul { padding-left: 20px; }
+.lista-enlaces { list-style: none; padding-left: 0; }
+.lista-enlaces li { margin: 10px 0; }
+.lista-enlaces li > span { display: block; color: var(--suave); font-size: 0.9rem; }
+.entrada-cambio { background: var(--panel); border: 1px solid var(--linea); border-radius: 12px; padding: 12px 16px; margin: 12px 0; }
+.entrada-cambio time { color: var(--suave); font-size: 0.85rem; }
+.entrada-cambio h3 { margin: 4px 0 6px; font-size: 1.05rem; }
+.entrada-cambio p { margin: 0; max-width: 75ch; }
+.prosa code { background: var(--vacio); padding: 1px 5px; border-radius: 4px; }
+
+/* Cinta inferior con las páginas del sitio. */
+.pie nav { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; }
+.pie nav a { white-space: nowrap; }

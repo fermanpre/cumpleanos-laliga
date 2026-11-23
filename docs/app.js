@@ -357,14 +357,7 @@ function pintarEquipo(idEquipo) {
 }
 
 function pintarCabeceraYPie() {
-  document.documentElement.lang = estado.idioma;
   document.title = t("titulo");
-  var elementos = document.querySelectorAll("[data-i18n]");
-  Array.prototype.forEach.call(elementos, function (elemento) {
-    elemento.textContent = t(elemento.getAttribute("data-i18n"));
-  });
-  document.getElementById("btnIdioma").textContent = estado.idioma === "es" ? "EN" : "ES";
-  document.getElementById("btnTema").textContent = t("tema_" + etiquetaTema());
   document.getElementById("pie").textContent = t("fuente", { fecha: estado.datos.consulta });
 }
 
@@ -391,37 +384,9 @@ function enrutar() {
   if (partes[1] && estado.temporada !== "todas") { pintarEquipo(partes[1]); } else { pintarResumen(); }
 }
 
-/* Tema: automático (según el sistema), claro u oscuro; se guarda en el navegador si se puede. */
-function etiquetaTema() {
-  var atributo = document.documentElement.getAttribute("data-theme");
-  if (atributo === "light") { return "claro"; }
-  if (atributo === "dark") { return "oscuro"; }
-  return "auto";
-}
-
-function cambiarTema() {
-  var siguiente = { auto: "light", claro: "dark", oscuro: "auto" }[etiquetaTema()];
-  if (siguiente === "auto") {
-    document.documentElement.removeAttribute("data-theme");
-  } else {
-    document.documentElement.setAttribute("data-theme", siguiente);
-  }
-  try {
-    if (siguiente === "auto") { localStorage.removeItem("cumple-tema"); } else { localStorage.setItem("cumple-tema", siguiente); }
-  } catch (error) { /* sin almacenamiento: vale solo para esta visita */ }
-  document.getElementById("btnTema").textContent = t("tema_" + etiquetaTema());
-}
-
-function guardarIdioma() {
-  try { localStorage.setItem("idioma", estado.idioma); } catch (error) { /* sin almacenamiento */ }
-}
-
 function iniciar(datos) {
   estado.datos = datos;
-  var guardado = null;
-  try { guardado = localStorage.getItem("idioma"); } catch (error) { /* sin almacenamiento */ }
-  estado.idioma = guardado === "en" || guardado === "es" ? guardado :
-    (navigator.language || "es").slice(0, 2) === "es" ? "es" : "en";
+  estado.idioma = window.Comun.idioma();
   estado.temporada = Object.keys(datos.temporadas).sort().reverse()[0];
   pintarTemporadas();
   pintarCabeceraYPie();
@@ -429,14 +394,13 @@ function iniciar(datos) {
     var partes = location.hash.replace(/^#\/?/, "").split("/").filter(Boolean);
     location.hash = "#/" + evento.target.value + (partes[1] ? "/" + partes[1] : "");
   });
-  document.getElementById("btnIdioma").addEventListener("click", function () {
-    estado.idioma = estado.idioma === "es" ? "en" : "es";
-    guardarIdioma();
+  /* El botón de idioma y el de tema los gestiona comun.js; aquí solo se vuelve a pintar el contenido. */
+  window.Comun.alCambiarIdioma(function (idioma) {
+    estado.idioma = idioma;
     pintarTemporadas();
     pintarCabeceraYPie();
     enrutar();
   });
-  document.getElementById("btnTema").addEventListener("click", cambiarTema);
   window.addEventListener("hashchange", enrutar);
   enrutar();
 }
