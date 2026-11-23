@@ -23,6 +23,9 @@ CABECERAS = {"User-Agent": "CumpleanosLaLiga/0.1 (proyecto personal de portfolio
 # Para la temporada en curso se usa la versión actual (corte vacío).
 TEMPORADAS = {
     "2026-27": {"liga": "Primera División de España 2026-27", "corte": "", "seccion": "2026-27"},
+    "2024-25": {"liga": "Primera División de España 2024-25", "corte": "2024-09-15T00:00:00Z", "seccion": "2024-25"},
+    "2023-24": {"liga": "Primera División de España 2023-24", "corte": "2023-09-15T00:00:00Z", "seccion": "2023-24"},
+    "2022-23": {"liga": "Primera División de España 2022-23", "corte": "2022-09-15T00:00:00Z", "seccion": "2022-23"},
     "2025-26": {"liga": "Primera División de España 2025-26", "corte": "2025-09-15T00:00:00Z", "seccion": "2025-26"},
 }
 
@@ -89,7 +92,7 @@ def equipos_de_la_liga(titulo_liga):
         lineas = [linea for linea in fila.strip().split("\n") if linea.startswith("|")]
         if not lineas:
             continue
-        coincidencia = re.match(r"\|\s*\[\[([^\]|]+)(?:\|([^\]]+))?\]\]", lineas[0])
+        coincidencia = re.match(r"\|\s*(?:\{\{nowrap\|)?\s*\[\[([^\]|]+)(?:\|([^\]]+))?\]\]", lineas[0])
         if coincidencia:
             articulo = coincidencia.group(1).strip()
             nombre = (coincidencia.group(2) or articulo).strip()
@@ -194,12 +197,21 @@ def leer_dorsal(valor):
     return int(limpio) if limpio.isdigit() else None
 
 
+def etiqueta_con_guiones_flexibles(etiqueta):
+    """«2023-24» también debe casar con «2023–24» (raya) y con «2023/24»."""
+    anio_inicio, anio_fin = etiqueta.split("-")
+    return anio_inicio + "[-–/]" + anio_fin
+
+
 def seccion_de_plantilla(texto, etiqueta_temporada):
     """Devuelve el texto desde el encabezado de plantilla hasta la siguiente sección sin jugadores."""
-    patron = re.compile(r"=+\s*Plant(?:illa|el)[^=\n]*" + re.escape(etiqueta_temporada) + r"[^=\n]*=+")
+    patron = re.compile(r"=+\s*Plant(?:illa|el)[^=\n]*" + etiqueta_con_guiones_flexibles(etiqueta_temporada) + r"[^=\n]*=+")
     coincidencia = patron.search(texto)
     if not coincidencia:
         coincidencia = re.search(r"=+\s*Plant(?:illa|el)[^=\n]*=+", texto)
+        if not coincidencia:
+            # Algunos artículos (p. ej., Las Palmas) titulan la sección solo «Jugadores».
+            coincidencia = re.search(r"=+\s*Jugadores\s*=+", texto)
         if not coincidencia:
             return None
     resto = texto[coincidencia.end():]

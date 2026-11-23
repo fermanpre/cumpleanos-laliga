@@ -26,7 +26,7 @@ var TEXTOS = {
     varios: "2 o más jugadores",
     ninguno: "Ninguno",
     nota_plantilla: "Jugadores con dorsal del 1 al 25 que figuran en la plantilla del club en la Wikipedia en español. Puede haber dorsales sin jugador o altas y bajas recientes.",
-    fuente: "Fuentes: plantilla oficial de LALIGA (temporada 2026/27) y Wikipedia en español (CC BY-SA 4.0) con fechas contrastadas con Wikidata (CC0) para las demás; consultadas el {fecha}. Proyecto de portfolio.",
+    fuente: "Fuentes: plantilla oficial de LALIGA (temporada 2026/27); Wikipedia en español (CC BY-SA 4.0) y bdfutbol.com (solo dorsales) para el resto, con fechas contrastadas con Wikidata (CC0). Plantillas al cierre del mercado de verano; consultadas el {fecha}. Puede haber errores en fechas y dorsales. Proyecto de portfolio.",
     y: " y ",
     no_encontrado: "No se ha encontrado ese equipo.",
     x_de: "{a} de {b}"
@@ -56,7 +56,7 @@ var TEXTOS = {
     varios: "2 or more players",
     ninguno: "None",
     nota_plantilla: "Players with shirt numbers 1 to 25 listed in the club's squad on Spanish Wikipedia. Some numbers may be vacant, and recent signings or departures may be missing.",
-    fuente: "Sources: official LALIGA squads (2026/27 season) and Spanish Wikipedia (CC BY-SA 4.0) with dates cross-checked against Wikidata (CC0) for the others; retrieved {fecha}. Portfolio project.",
+    fuente: "Sources: official LALIGA squads (2026/27 season); Spanish Wikipedia (CC BY-SA 4.0) and bdfutbol.com (shirt numbers only) for the others, with dates cross-checked against Wikidata (CC0). Squads at the close of the summer window; retrieved {fecha}. Dates and shirt numbers may contain errors. Portfolio project.",
     y: " and ",
     no_encontrado: "Team not found.",
     x_de: "{a} of {b}"
@@ -195,7 +195,8 @@ function pintarEquipo(idEquipo) {
   var ocupacion = {};
   equipo.jugadores.forEach(function (jugador) {
     var clave = jugador.mes + "-" + jugador.dia;
-    ocupacion[clave] = (ocupacion[clave] || 0) + 1;
+    if (!ocupacion[clave]) { ocupacion[clave] = []; }
+    ocupacion[clave].push(jugador);
   });
   var html = '<a class="atras" href="#/' + estado.temporada + '">' + escapar(t("atras")) + "</a>";
   html += "<h1>" + escapar(equipo.nombre) + " · " + escapar(estado.temporada.replace("-", "/")) + "</h1>";
@@ -214,9 +215,14 @@ function pintarEquipo(idEquipo) {
     html += '<div class="mes"><span class="etq">' + escapar(nombreMes(mes).slice(0, 3)) + "</span>";
     for (var dia = 1; dia <= 31; dia++) {
       if (dia > diasDelMes(mes)) { html += '<span class="dia fuera"></span>'; continue; }
-      var cantidad = ocupacion[mes + "-" + dia] || 0;
+      var jugadoresDelDia = ocupacion[mes + "-" + dia] || [];
+      var cantidad = jugadoresDelDia.length;
       var clase = cantidad > 1 ? "varios" : cantidad === 1 ? "uno" : "";
-      html += '<span class="dia ' + clase + '" title="' + escapar(textoFecha(mes, dia)) + '"></span>';
+      var textoTooltip = textoFecha(mes, dia);
+      jugadoresDelDia.forEach(function (jugador) {
+        textoTooltip += "\n" + jugador.nombre + " (" + jugador.dorsal + ")";
+      });
+      html += '<span class="dia ' + clase + '" title="' + escapar(textoTooltip) + '"></span>';
     }
     html += "</div>";
   }

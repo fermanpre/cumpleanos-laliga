@@ -82,9 +82,11 @@ def palabras_de(texto):
     return [palabra for palabra in letras.split() if len(palabra) > 1]
 
 
-def rellenar_dorsales_con_bdfutbol(nombre_equipo, jugadores_wikipedia, informe):
+def rellenar_dorsales_con_bdfutbol(temporada, nombre_equipo, jugadores_wikipedia, informe):
     """Da dorsal a los jugadores de Wikipedia que no lo traen, si su nombre casa con una sola fila de bdfutbol."""
-    ruta = os.path.join(CARPETA, "bdfutbol_2025-26.json")
+    ruta = os.path.join(CARPETA, "bdfutbol_" + temporada + ".json")
+    if not os.path.exists(ruta):
+        return jugadores_wikipedia
     with open(ruta, encoding="utf-8") as fichero:
         bdfutbol = json.load(fichero)
     filas = []
@@ -111,6 +113,29 @@ def rellenar_dorsales_con_bdfutbol(nombre_equipo, jugadores_wikipedia, informe):
     return resultado
 
 
+def cargar_fechas_wikidata():
+    """Devuelve {(temporada, equipo, nombre): [año, mes, día]} con las fechas de Wikidata que se pueden usar.
+
+    Regla: la fecha de Wikidata sustituye a la de Wikipedia solo si es completa (mes y día distintos de 0),
+    no es el 1 de enero (marcador de posición habitual) y el año coincide con el de Wikipedia (misma persona).
+    """
+    ruta = os.path.join(CARPETA, "comparacion_wikidata.json")
+    fechas = {}
+    with open(ruta, encoding="utf-8") as fichero:
+        registro = json.load(fichero)
+    for fila in registro:
+        wikidata = fila["wikidata"]
+        wikipedia = fila["wikipedia"]
+        if not wikidata or wikidata[1] == 0 or wikidata[2] == 0:
+            continue
+        if wikidata[1] == 1 and wikidata[2] == 1:
+            continue
+        if wikidata[0] != wikipedia[0]:
+            continue
+        fechas[(fila["temporada"], fila["equipo"], fila["nombre"])] = wikidata
+    return fechas
+
+
 def crear_identificador(nombre):
     sin_tildes = unicodedata.normalize("NFKD", nombre).encode("ascii", "ignore").decode("ascii")
     return re.sub(r"[^a-z0-9]+", "-", sin_tildes.lower()).strip("-")
@@ -129,21 +154,29 @@ def main():
     salida = {"consulta": FECHA_CONSULTA, "temporadas": {}}
     resumen_texto = []
     informe_dorsales = []
+    fechas_wikidata = cargar_fechas_wikidata()
+    cambios_wikidata = 0
     for temporada, equipos in brutos.items():
         lista_equipos = []
         con_coincidencia = 0
         for equipo in equipos:
             jugadores = []
             brutos_equipo = equipo["jugadores"]
-            if temporada == "2025-26":
-                brutos_equipo = rellenar_dorsales_con_bdfutbol(equipo["nombre"], equipo["jugadores"], informe_dorsales)
+            if temporada != TEMPORADA_LALIGA:
+                brutos_equipo = rellenar_dorsales_con_bdfutbol(temporada, equipo["nombre"], equipo["jugadores"], informe_dorsales)
             if temporada == TEMPORADA_LALIGA:
                 brutos_equipo = jugadores_desde_laliga(equipo["nombre"], equipo["jugadores"])
             for bruto in brutos_equipo:
                 if bruto["dorsal"] is None or not (DORSAL_MINIMO <= bruto["dorsal"] <= DORSAL_MAXIMO):
                     continue
                 clave = (equipo["nombre"], bruto["nombre"])
-                anio, mes, dia = CORRECCIONES.get(clave, bruto["nacimiento"])
+                fecha = bruto["nacimiento"]
+                if temporada != TEMPORADA_LALIGA:
+                    fecha_wd = fechas_wikidata.get((temporada, equipo["nombre"], bruto["nombre"]))
+                    if fecha_wd and fecha_wd != fecha:
+                        fecha = fecha_wd
+                        cambios_wikidata += 1
+                anio, mes, dia = CORRECCIONES.get(clave, fecha)
                 date(anio, mes, dia)  # falla si la fecha no existe
                 jugadores.append({"dorsal": bruto["dorsal"], "nombre": bruto["nombre"],
                                   "mes": mes, "dia": dia})

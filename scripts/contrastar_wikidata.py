@@ -21,7 +21,7 @@ for temporada, equipos in datos.items():
     for equipo in equipos:
         grupos = defaultdict(list)
         for jugador in equipo["jugadores"]:
-            if 1 <= jugador["dorsal"] <= 25:
+            if jugador["dorsal"] is None or 1 <= jugador["dorsal"] <= 25:
                 grupos[tuple(jugador["nacimiento"][1:])].append(jugador)
         for lista in grupos.values():
             for jugador in lista:
