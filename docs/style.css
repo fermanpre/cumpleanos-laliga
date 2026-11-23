@@ -27,13 +27,27 @@ body { margin: 0; background: var(--fondo); color: var(--texto);
   font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
 a { color: var(--azul); }
 .oculto-visual { position: absolute; left: -9999px; }
-.barra { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;
-  padding: 12px 16px; background: var(--panel); border-bottom: 1px solid var(--linea); }
-.marca { font-weight: 700; font-size: 1.15rem; color: var(--texto); text-decoration: none; }
+.cabecera-sitio { background: var(--panel); border-bottom: 1px solid var(--linea); }
+.cabecera-sitio .interior { max-width: 1100px; margin: 0 auto; padding: 10px 16px; display: flex; flex-wrap: wrap;
+  align-items: center; justify-content: space-between; gap: 6px 18px; }
+.marca { font-weight: 800; letter-spacing: 0.04em; font-size: 1.2rem; color: var(--texto); text-decoration: none; }
+.marca small { font-weight: 400; letter-spacing: 0; color: var(--suave); font-size: 0.75rem; margin-left: 8px; }
 .controles { display: flex; gap: 8px; }
+.subnav { position: sticky; top: 0; z-index: 40; background: var(--panel); border-bottom: 1px solid var(--linea); }
+.subnav .interior { max-width: 1100px; margin: 0 auto; padding: 6px 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.subnav label { color: var(--suave); font-size: 0.92rem; }
+.resumen-tabla { margin-top: 6px; }
+.resumen-tabla td.cifra-celda, .resumen-tabla th.cifra-celda { text-align: right; font-variant-numeric: tabular-nums; }
+.resumen-tabla tr.total td { font-weight: 700; border-top: 2px solid var(--linea); }
+.pie { max-width: 1100px; margin: 0 auto; padding: 8px 16px 40px; color: var(--suave); font-size: 0.85rem; }
+.pie p { margin: 8px 0; }
+.enlaces-contacto-autor { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 10px; }
+.enlace-contacto-autor { display: inline-flex; align-items: center; gap: 8px; width: fit-content; color: var(--texto); text-decoration: none; }
+.enlace-contacto-autor:hover { color: var(--azul); }
+@media (max-width: 560px) { .marca small { display: none; } }
 select, button { font: inherit; color: var(--texto); background: var(--panel);
   border: 1px solid var(--linea); border-radius: 8px; padding: 6px 10px; cursor: pointer; }
-main { max-width: 980px; margin: 0 auto; padding: 20px 16px 40px; }
+main { max-width: 1100px; margin: 0 auto; padding: 20px 16px 40px; }
 h1 { font-size: 1.6rem; margin: 0 0 8px; }
 h2 { font-size: 1.15rem; margin: 28px 0 10px; }
 .explica { color: var(--suave); max-width: 70ch; }
@@ -76,7 +90,6 @@ tr.par td:last-child { font-weight: 700; color: var(--acento); }
 .leyenda { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 8px; font-size: 0.85rem; color: var(--suave); }
 .leyenda i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 4px; }
 .atras { display: inline-block; margin-bottom: 10px; }
-.pie { max-width: 980px; margin: 0 auto; padding: 0 16px 30px; color: var(--suave); font-size: 0.85rem; }
 @media (max-width: 560px) {
   .fila-barra { grid-template-columns: 90px 1fr 54px; }
   .cifra .grande { font-size: 3.2rem; }

@@ -25,11 +25,28 @@ var TEXTOS = {
     un_jugador: "1 jugador",
     varios: "2 o más jugadores",
     ninguno: "Ninguno",
-    nota_plantilla: "Jugadores con dorsal del 1 al 25 que figuran en la plantilla del club en la Wikipedia en español. Puede haber dorsales sin jugador o altas y bajas recientes.",
+    nota_plantilla: "Jugadores con dorsal del 1 al 25 que figuran en la plantilla del club (fuentes al pie de la página). Puede haber dorsales sin jugador o altas y bajas recientes.",
     fuente: "Fuentes: plantilla oficial de LALIGA (temporada 2026/27); Wikipedia en español (CC BY-SA 4.0) y bdfutbol.com (solo dorsales) para el resto, con fechas contrastadas con Wikidata (CC0). Plantillas al cierre del mercado de verano; consultadas el {fecha}. Puede haber errores en fechas y dorsales. Proyecto de portfolio.",
     y: " y ",
     no_encontrado: "No se ha encontrado ese equipo.",
-    x_de: "{a} de {b}"
+    x_de: "{a} de {b}",
+    subtitulo: "La paradoja del cumpleaños en el fútbol",
+    selecciona: "Selecciona una temporada",
+    todas: "Todas",
+    tema_auto: "Tema: auto",
+    tema_claro: "Tema: claro",
+    tema_oscuro: "Tema: oscuro",
+    todas_titulo: "Las cinco temporadas juntas",
+    todas_explicacion: "Suma de todos los equipos y temporadas: cada equipo-temporada cuenta una vez si tiene al menos dos jugadores con el mismo cumpleaños.",
+    de_equipos_temporada: "de {n} plantillas (equipo y temporada) tienen al menos dos jugadores que cumplen años el mismo día",
+    col_temporada: "Temporada",
+    col_equipos: "Equipos",
+    col_observado: "Con coincidencia",
+    col_esperado: "Esperado",
+    total: "Total",
+    por_temporada: "Resumen por temporada",
+    veces: "{a} de {b} temporadas con coincidencia",
+    ultima_plantilla: "Ver la plantilla más reciente"
   },
   en: {
     titulo: "Birthdays in LaLiga",
@@ -55,11 +72,28 @@ var TEXTOS = {
     un_jugador: "1 player",
     varios: "2 or more players",
     ninguno: "None",
-    nota_plantilla: "Players with shirt numbers 1 to 25 listed in the club's squad on Spanish Wikipedia. Some numbers may be vacant, and recent signings or departures may be missing.",
+    nota_plantilla: "Players with shirt numbers 1 to 25 listed in the club's squad (sources at the bottom of the page). Some numbers may be vacant, and recent signings or departures may be missing.",
     fuente: "Sources: official LALIGA squads (2026/27 season); Spanish Wikipedia (CC BY-SA 4.0) and bdfutbol.com (shirt numbers only) for the others, with dates cross-checked against Wikidata (CC0). Squads at the close of the summer window; retrieved {fecha}. Dates and shirt numbers may contain errors. Portfolio project.",
     y: " and ",
     no_encontrado: "Team not found.",
-    x_de: "{a} of {b}"
+    x_de: "{a} of {b}",
+    subtitulo: "The birthday paradox in football",
+    selecciona: "Pick a season",
+    todas: "All",
+    tema_auto: "Theme: auto",
+    tema_claro: "Theme: light",
+    tema_oscuro: "Theme: dark",
+    todas_titulo: "All five seasons together",
+    todas_explicacion: "Sum of every team and season: each team-season counts once if it has at least two players with the same birthday.",
+    de_equipos_temporada: "of {n} squads (team and season) have at least two players with the same birthday",
+    col_temporada: "Season",
+    col_equipos: "Teams",
+    col_observado: "With a match",
+    col_esperado: "Expected",
+    total: "Total",
+    por_temporada: "Summary by season",
+    veces: "{a} of {b} seasons with a match",
+    ultima_plantilla: "See the latest squad"
   }
 };
 
@@ -121,7 +155,88 @@ function equiposDeTemporada() {
   return estado.datos.temporadas[estado.temporada].equipos;
 }
 
+/* Vista «Todas»: suma de todos los equipos y temporadas. */
+function calcularAgregado() {
+  var temporadas = Object.keys(estado.datos.temporadas).sort().reverse();
+  var filas = [];
+  var porEquipo = {};
+  var totalEquipos = 0;
+  var totalObservado = 0;
+  var totalEsperado = 0;
+  temporadas.forEach(function (clave) {
+    var observado = 0;
+    var esperado = 0;
+    var equipos = estado.datos.temporadas[clave].equipos;
+    equipos.forEach(function (equipo) {
+      var grupos = coincidenciasDe(equipo.jugadores);
+      if (grupos.length > 0) { observado++; }
+      esperado += probabilidadTeorica(equipo.jugadores.length);
+      if (!porEquipo[equipo.id]) {
+        porEquipo[equipo.id] = { id: equipo.id, nombre: equipo.nombre, temporadas: 0, con: 0, ultima: clave, parejas: [] };
+      }
+      var acumulado = porEquipo[equipo.id];
+      acumulado.temporadas++;
+      if (grupos.length > 0) { acumulado.con++; }
+    });
+    filas.push({ clave: clave, equipos: equipos.length, observado: observado, esperado: esperado });
+    totalEquipos += equipos.length;
+    totalObservado += observado;
+    totalEsperado += esperado;
+  });
+  var lista = Object.keys(porEquipo).map(function (id) { return porEquipo[id]; });
+  lista.sort(function (a, b) { return a.nombre.localeCompare(b.nombre); });
+  return { filas: filas, lista: lista, totalEquipos: totalEquipos, totalObservado: totalObservado, totalEsperado: totalEsperado };
+}
+
+function pintarAgregado() {
+  var agregado = calcularAgregado();
+  estado.agregado = agregado;
+  var html = "";
+  html += "<h1>" + escapar(t("todas_titulo")) + "</h1>";
+  html += '<p class="explica">' + escapar(t("todas_explicacion")) + "</p>";
+  html += '<div class="cifra"><span class="grande">' + agregado.totalObservado + "</span>" +
+    '<span class="texto">' + escapar(t("de_equipos_temporada", { n: agregado.totalEquipos })) + "</span></div>";
+  html += '<div class="comparacion">';
+  html += '<div class="fila-barra"><span>' + escapar(t("observado")) + '</span><div class="pista"><div class="relleno real" style="width:' +
+    (agregado.totalObservado / agregado.totalEquipos * 100) + '%"></div></div><strong>' + agregado.totalObservado + "</strong></div>";
+  html += '<div class="fila-barra"><span>' + escapar(t("esperado")) + '</span><div class="pista"><div class="relleno teorico" style="width:' +
+    (agregado.totalEsperado / agregado.totalEquipos * 100) + '%"></div></div><strong>' + formatoNumero(agregado.totalEsperado, 1) + "</strong></div>";
+  html += '<p class="nota">' + escapar(t("nota_esperado")) + "</p></div>";
+  html += "<h2>" + escapar(t("por_temporada")) + "</h2>";
+  html += '<table class="resumen-tabla"><thead><tr><th>' + escapar(t("col_temporada")) + '</th><th class="cifra-celda">' +
+    escapar(t("col_equipos")) + '</th><th class="cifra-celda">' + escapar(t("col_observado")) + '</th><th class="cifra-celda">' +
+    escapar(t("col_esperado")) + "</th></tr></thead><tbody>";
+  agregado.filas.forEach(function (fila) {
+    html += '<tr><td><a href="#/' + fila.clave + '">' + escapar(fila.clave.replace("-", "/")) + '</a></td><td class="cifra-celda">' + fila.equipos +
+      '</td><td class="cifra-celda">' + fila.observado + '</td><td class="cifra-celda">' + formatoNumero(fila.esperado, 1) + "</td></tr>";
+  });
+  html += '<tr class="total"><td>' + escapar(t("total")) + '</td><td class="cifra-celda">' + agregado.totalEquipos + '</td><td class="cifra-celda">' +
+    agregado.totalObservado + '</td><td class="cifra-celda">' + formatoNumero(agregado.totalEsperado, 1) + "</td></tr></tbody></table>";
+  html += "<h2>" + escapar(t("equipos")) + "</h2>";
+  html += '<input class="filtro" id="filtro" type="search" placeholder="' + escapar(t("buscar")) + '" aria-label="' + escapar(t("buscar")) + '">';
+  html += '<div class="rejilla" id="rejilla"></div>';
+  document.getElementById("contenido").innerHTML = html;
+  var filtro = document.getElementById("filtro");
+  filtro.addEventListener("input", function () { pintarTarjetasAgregado(filtro.value); });
+  pintarTarjetasAgregado("");
+}
+
+function pintarTarjetasAgregado(consulta) {
+  var buscado = sinTildes(consulta);
+  var html = "";
+  estado.agregado.lista.forEach(function (equipo) {
+    if (buscado && sinTildes(equipo.nombre).indexOf(buscado) < 0) { return; }
+    html += '<a class="tarjeta' + (equipo.con ? " coincide" : "") + '" href="#/' + equipo.ultima + "/" + equipo.id + '">';
+    html += "<strong>" + escapar(equipo.nombre) + "</strong>";
+    html += "<small>" + escapar(t("veces", { a: equipo.con, b: equipo.temporadas })) + "</small>";
+    html += "<small>" + escapar(t("ultima_plantilla")) + " (" + escapar(equipo.ultima.replace("-", "/")) + ")</small>";
+    html += "</a>";
+  });
+  document.getElementById("rejilla").innerHTML = html;
+}
+
 function pintarResumen() {
+  if (estado.temporada === "todas") { pintarAgregado(); return; }
   var equipos = equiposDeTemporada();
   var conCoincidencia = 0;
   var esperado = 0;
@@ -249,12 +364,17 @@ function pintarCabeceraYPie() {
     elemento.textContent = t(elemento.getAttribute("data-i18n"));
   });
   document.getElementById("btnIdioma").textContent = estado.idioma === "es" ? "EN" : "ES";
+  document.getElementById("btnTema").textContent = t("tema_" + etiquetaTema());
   document.getElementById("pie").textContent = t("fuente", { fecha: estado.datos.consulta });
 }
 
 function pintarTemporadas() {
   var selector = document.getElementById("selTemporada");
   selector.innerHTML = "";
+  var opcionTodas = document.createElement("option");
+  opcionTodas.value = "todas";
+  opcionTodas.textContent = t("todas");
+  selector.appendChild(opcionTodas);
   Object.keys(estado.datos.temporadas).sort().reverse().forEach(function (clave) {
     var opcion = document.createElement("option");
     opcion.value = clave;
@@ -266,9 +386,30 @@ function pintarTemporadas() {
 
 function enrutar() {
   var partes = location.hash.replace(/^#\/?/, "").split("/").filter(Boolean);
-  if (partes[0] && estado.datos.temporadas[partes[0]]) { estado.temporada = partes[0]; }
+  if (partes[0] && (partes[0] === "todas" || estado.datos.temporadas[partes[0]])) { estado.temporada = partes[0]; }
   document.getElementById("selTemporada").value = estado.temporada;
-  if (partes[1]) { pintarEquipo(partes[1]); } else { pintarResumen(); }
+  if (partes[1] && estado.temporada !== "todas") { pintarEquipo(partes[1]); } else { pintarResumen(); }
+}
+
+/* Tema: automático (según el sistema), claro u oscuro; se guarda en el navegador si se puede. */
+function etiquetaTema() {
+  var atributo = document.documentElement.getAttribute("data-theme");
+  if (atributo === "light") { return "claro"; }
+  if (atributo === "dark") { return "oscuro"; }
+  return "auto";
+}
+
+function cambiarTema() {
+  var siguiente = { auto: "light", claro: "dark", oscuro: "auto" }[etiquetaTema()];
+  if (siguiente === "auto") {
+    document.documentElement.removeAttribute("data-theme");
+  } else {
+    document.documentElement.setAttribute("data-theme", siguiente);
+  }
+  try {
+    if (siguiente === "auto") { localStorage.removeItem("cumple-tema"); } else { localStorage.setItem("cumple-tema", siguiente); }
+  } catch (error) { /* sin almacenamiento: vale solo para esta visita */ }
+  document.getElementById("btnTema").textContent = t("tema_" + etiquetaTema());
 }
 
 function guardarIdioma() {
@@ -291,9 +432,11 @@ function iniciar(datos) {
   document.getElementById("btnIdioma").addEventListener("click", function () {
     estado.idioma = estado.idioma === "es" ? "en" : "es";
     guardarIdioma();
+    pintarTemporadas();
     pintarCabeceraYPie();
     enrutar();
   });
+  document.getElementById("btnTema").addEventListener("click", cambiarTema);
   window.addEventListener("hashchange", enrutar);
   enrutar();
 }
